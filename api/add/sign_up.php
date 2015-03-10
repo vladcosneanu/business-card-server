@@ -5,6 +5,7 @@ include_once ('../../db/db_connection.php');
 $link = Database::getDBConnection();
 
 include_once ("../../objects/User.php");
+include_once ("../../objects/BusinessCard.php");
 
 $title = $_GET["title"];
 $firstName = $_GET["first_name"];
@@ -25,6 +26,21 @@ if ($available) {
 	$user->setUsername($username);
 	$user->setPassword($password);
 	$user->save();
+	
+	$query = "SELECT * FROM users WHERE username = '" . $username . "' AND password = SHA1('" . $password . "');";
+	$queryResult = mysqli_query($link, $query);
+
+	$found = false;
+	while($row = mysqli_fetch_array($queryResult)) {
+		$found = true;
+		$user->setId($row["id"]);
+	}
+	
+	$businessCard = new BusinessCard();
+	$businessCard->setUserId($user->getId());
+	$businessCard->setEmail($email);
+	$businessCard->setPhone($phone);
+	$businessCard->save();
 	
 	$result["success"] = "true";
 } else {
