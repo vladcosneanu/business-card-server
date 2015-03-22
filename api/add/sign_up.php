@@ -20,7 +20,6 @@ $available = User::isUsernameAvailable($username);
 $result = array();
 if ($available) {
 	$user = new User();
-	$user->setTitle($title);
 	$user->setFirstName($firstName);
 	$user->setLastName($lastName);
 	$user->setUsername($username);
@@ -38,6 +37,7 @@ if ($available) {
 	
 	$businessCard = new BusinessCard();
 	$businessCard->setUserId($user->getId());
+	$businessCard->setTitle($title);
 	$businessCard->setEmail($email);
 	$businessCard->setPhone($phone);
 	$businessCard->save();

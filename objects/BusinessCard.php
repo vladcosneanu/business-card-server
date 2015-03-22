@@ -1,10 +1,11 @@
 <?php
 class BusinessCard {
-	private $id;
-	private $userId;
-	private $email;
-	private $phone;
-	private $address;
+	public $id;
+	public $userId;
+	public $title;
+	public $email;
+	public $phone;
+	public $address;
 	
 	public function setId($id) {
 		$this->id = $id;
@@ -20,6 +21,14 @@ class BusinessCard {
 	
 	public function getUserId() {
 		return $this->userId;
+	}
+	
+	public function setTitle($title) {
+		$this->title = $title;
+	}
+	
+	public function getTitle() {
+		return $this->title;
 	}
 	
 	public function setEmail($email) {
@@ -49,8 +58,8 @@ class BusinessCard {
 	public function save() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
-		$query = "INSERT INTO business_cards (user_id, email, phone, address) 
-			VALUES ('" . $this->getUserId() . "', '" . $this->getEmail() . "', '" . $this->getPhone() . "','" . $this->getAddress() . "')";
+		$query = "INSERT INTO business_cards (user_id, title,  email, phone, address) 
+			VALUES ('" . $this->getUserId() . "', '" . $this->getTitle() . "', '" . $this->getEmail() . "', '" . $this->getPhone() . "','" . $this->getAddress() . "')";
 		
 		if (!mysqli_query($link, $query)) {
   			die('Error: ' . mysqli_error($link));

@@ -1,7 +1,6 @@
 <?php
 class User {
 	private $id;
-	private $title;
 	private $firstName;
 	private $lastName;
 	private $username;
@@ -13,14 +12,6 @@ class User {
 	
 	public function getId() {
 		return $this->id;
-	}
-	
-	public function setTitle($title) {
-		$this->title = $title;
-	}
-	
-	public function getTitle() {
-		return $this->title;
 	}
 	
 	public function setFirstName($firstName) {
@@ -58,11 +49,11 @@ class User {
 	public function save() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
-		$query = "INSERT INTO users (title, first_name, last_name, username, password) 
-			VALUES ('" . $this->getTitle() . "', '" . $this->getFirstName() . "', '" . $this->getLastName() . "','" . $this->getUsername() . "', SHA1('" . $this->getPassword(). "'))";
+		$query = "INSERT INTO users (first_name, last_name, username, password) 
+			VALUES ('" . $this->getFirstName() . "', '" . $this->getLastName() . "','" . $this->getUsername() . "', SHA1('" . $this->getPassword(). "'))";
 		
 		if (!mysqli_query($link, $query)) {
-  			die('Error: ' . mysqli_error($link));
+  			die('Error aici: ' . mysqli_error($link));
 		}
 	}
 
@@ -76,6 +67,30 @@ class User {
 			return false;
 		}
 		return true;
+	}
+	
+	public static function getMyCards($userId) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		include_once (Utils::$relativePath . "objects/BusinessCard.php");
+		$link = Database::getDBConnection();
+		
+		$query = "SELECT * FROM business_cards WHERE user_id = " . $userId . ";";
+		$result = mysqli_query($link, $query);
+		
+		$myCards = array();
+		while($row = mysqli_fetch_array($result)) {
+			$card = new BusinessCard();
+			$card->setId($row["id"]);
+			$card->setUserId($row["user_id"]);
+			$card->setTitle($row["title"]);
+			$card->setEmail($row["email"]);
+			$card->setPhone($row["phone"]);
+			$card->setAddress($row["address"]);
+			
+			$myCards[] = $card;
+		}
+
+		return $myCards;
 	}
 }
 ?>
