@@ -1,6 +1,8 @@
 <?php
 class BusinessCard {
 	public $id;
+	public $firstName;
+	public $lastName;
 	public $userId;
 	public $title;
 	public $email;
@@ -13,6 +15,22 @@ class BusinessCard {
 	
 	public function getId() {
 		return $this->id;
+	}
+	
+	public function setFirstName($firstName) {
+		$this->firstName = $firstName;
+	}
+	
+	public function getFirstName() {
+		return $this->firstName;
+	}
+	
+	public function setLastName($lastname) {
+		$this->lastname = $lastname;
+	}
+	
+	public function getLastName() {
+		return $this->lastname;
 	}
 	
 	public function setUserId($userId) {

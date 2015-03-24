@@ -92,5 +92,36 @@ class User {
 
 		return $myCards;
 	}
+	
+	public static function getSavedCards($userId) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		include_once (Utils::$relativePath . "objects/BusinessCard.php");
+		$link = Database::getDBConnection();
+		
+		$query = "SELECT bc.user_id, uc.card_id, bc.title, bc.email, bc.phone, bc.address, u.first_name, u.last_name, u.username
+				  FROM users_cards uc
+			      LEFT JOIN business_cards bc ON uc.card_id = bc.id 
+				  LEFT JOIN users u ON bc.user_id = u.id 
+				  WHERE uc.user_id = " . $userId . ";";
+		
+		$result = mysqli_query($link, $query);
+		
+		$savedCards = array();
+		while($row = mysqli_fetch_array($result)) {
+			$card = new BusinessCard();
+			$card->setId($row["card_id"]);
+			$card->setUserId($row["user_id"]);
+			$card->setTitle($row["title"]);
+			$card->setEmail($row["email"]);
+			$card->setPhone($row["phone"]);
+			$card->setAddress($row["address"]);
+			$card->setFirstName($row["first_name"]);
+			$card->setLastName($row["last_name"]);
+			
+			$savedCards[] = $card;
+		}
+
+		return $savedCards;
+	}
 }
 ?>
