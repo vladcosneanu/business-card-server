@@ -83,5 +83,17 @@ class BusinessCard {
   			die('Error: ' . mysqli_error($link));
 		}
 	}
+	
+	public function update() {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		$query = "UPDATE business_cards
+			      SET title = '" . $this->getTitle() . "', email = '" . $this->getEmail() . "', phone = '" . $this->getPhone() . "', address = '" . $this->getAddress() . "'
+				  WHERE id = " . $this->getId() . ";";
+
+		if (!mysqli_query($link, $query)) {
+  			die('Error: ' . mysqli_error($link));
+		}
+	}
 }
 ?>
