@@ -6,7 +6,6 @@ $link = Database::getDBConnection();
 
 include_once ("../../objects/BusinessCard.php");
 
-$id = $_GET["id"];
 $userId = $_GET["user_id"];
 $title = $_GET["title"];
 $email = $_GET["email"];
@@ -14,13 +13,12 @@ $phone = $_GET["phone"];
 $address = $_GET["address"];
 
 $businessCard = new BusinessCard();
-$businessCard->setId($id);
 $businessCard->setUserId($userId);
 $businessCard->setTitle($title);
 $businessCard->setEmail($email);
 $businessCard->setPhone($phone);
 $businessCard->setAddress($address);
-$businessCard->update();
+$businessCard->save();
 
 $result["success"] = "true";
 echo json_encode($result);

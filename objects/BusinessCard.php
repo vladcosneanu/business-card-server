@@ -89,8 +89,19 @@ class BusinessCard {
 		$link = Database::getDBConnection();
 		$query = "UPDATE business_cards
 			      SET title = '" . $this->getTitle() . "', email = '" . $this->getEmail() . "', phone = '" . $this->getPhone() . "', address = '" . $this->getAddress() . "'
-				  WHERE id = " . $this->getId() . ";";
-
+				  WHERE id = " . $this->getId() . " AND user_id = " . $this->getUserId() . ";";
+		
+		if (!mysqli_query($link, $query)) {
+  			die('Error: ' . mysqli_error($link));
+		}
+	}
+	
+	public function delete() {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		$query = "DELETE FROM business_cards 
+				  WHERE id = " . $this->getId() . " AND user_id = " . $this->getUserId() . ";";
+		
 		if (!mysqli_query($link, $query)) {
   			die('Error: ' . mysqli_error($link));
 		}
