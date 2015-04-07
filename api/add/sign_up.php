@@ -14,6 +14,7 @@ $email = $_GET["email"];
 $phone = $_GET["phone"];
 $username = $_GET["username"];
 $password = $_GET["password"];
+$public = $_GET["public"];
 
 $available = User::isUsernameAvailable($username);
 
@@ -40,6 +41,7 @@ if ($available) {
 	$businessCard->setTitle($title);
 	$businessCard->setEmail($email);
 	$businessCard->setPhone($phone);
+	$businessCard->setPublic($public);
 	$businessCard->save();
 	
 	$result["success"] = "true";

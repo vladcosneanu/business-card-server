@@ -8,6 +8,7 @@ class User {
 	private $lastLat;
 	private $lastLng;
 	private $lastGPSUpdate;
+	private $gcmRegId;
 	
 	public function setId($id) {
 		$this->id = $id;
@@ -73,6 +74,14 @@ class User {
 		return $this->lastGPSUpdate;
 	}
 	
+	public function setGCMRegId($gcmRegId) {
+		$this->gcmRegId = $gcmRegId;
+	}
+	
+	public function getGCMRegId() {
+		return $this->gcmRegId;
+	}
+	
 	public function save() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -113,6 +122,7 @@ class User {
 			$card->setEmail($row["email"]);
 			$card->setPhone($row["phone"]);
 			$card->setAddress($row["address"]);
+			$card->setPublic($row["public"]);
 			
 			$myCards[] = $card;
 		}
@@ -125,7 +135,7 @@ class User {
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
 		$link = Database::getDBConnection();
 		
-		$query = "SELECT bc.user_id, uc.card_id, bc.title, bc.email, bc.phone, bc.address, u.first_name, u.last_name, u.username
+		$query = "SELECT bc.user_id, uc.card_id, bc.title, bc.email, bc.phone, bc.address, bc.public, u.first_name, u.last_name, u.username
 				  FROM users_cards uc
 			      LEFT JOIN business_cards bc ON uc.card_id = bc.id 
 				  LEFT JOIN users u ON bc.user_id = u.id 
@@ -142,6 +152,7 @@ class User {
 			$card->setEmail($row["email"]);
 			$card->setPhone($row["phone"]);
 			$card->setAddress($row["address"]);
+			$card->setPublic($row["public"]);
 			$card->setFirstName($row["first_name"]);
 			$card->setLastName($row["last_name"]);
 			
@@ -162,6 +173,86 @@ class User {
 		if (!mysqli_query($link, $query)) {
   			die('Error: ' . mysqli_error($link));
 		}
+	}
+	
+	public function updateGCMRegId() {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		
+		$query = "UPDATE users 
+				  SET gcm_reg_id = '" . $this->getGCMRegId() . "' 
+				  WHERE id = " . $this->getId() . ";";
+				  
+		if (!mysqli_query($link, $query)) {
+  			die('Error: ' . mysqli_error($link));
+		}
+	}
+	
+	public static function getNearbyCards($userId, $distance, $lat, $lng) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		include_once (Utils::$relativePath . "objects/BusinessCard.php");
+		$link = Database::getDBConnection();
+		
+		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, u.first_name, u.last_name, 
+						u.last_lat, u.last_lng
+			      FROM business_cards bc
+				  LEFT JOIN users u ON bc.user_id = u.id
+				  WHERE u.gcm_reg_id IS NOT NULL AND bc.public = 1 AND bc.user_id <> " . $userId . " AND u.last_lat IS NOT NULL AND u.last_lng IS NOT NULL;";
+				  $result = mysqli_query($link, $query);
+		
+		$matchingCards = array();
+		while($row = mysqli_fetch_array($result)) {
+			$card = new BusinessCard();
+			$card->setId($row["id"]);
+			$card->setUserId($row["user_id"]);
+			$card->setTitle($row["title"]);
+			$card->setEmail($row["email"]);
+			$card->setPhone($row["phone"]);
+			$card->setAddress($row["address"]);
+			$card->setPublic($row["public"]);
+			$card->setFirstName($row["first_name"]);
+			$card->setLastName($row["last_name"]);
+			$card->setLastLat($row["last_lat"]);
+			$card->setLastLng($row["last_lng"]);
+			
+			$matchingCards[] = $card;
+		}
+		
+		$nearbyCards = array();
+		for ($i = 0; $i < count($matchingCards); $i++) {
+			$matchingCard = $matchingCards[$i];
+			if (User::getDistanceToCard($matchingCard, $lat, $lng) < $distance) {
+				$nearbyCards[] = $matchingCard;
+			}
+			
+			//var_dump($lat, $lng);
+			//var_dump($matchingCard->getlastLat(), $matchingCard->getLastLng());
+			//var_dump(User::getDistanceToCard($matchingCard, $lat, $lng));
+		}
+		
+		//var_dump($nearbyCards);die;
+		
+		return $nearbyCards;
+	}
+	
+	private static function getDistanceToCard($card, $lat, $lng) {
+		$cardLat = $card->getLastLat();
+		$cardLng = $card->getLastLng();
+		
+		$pi80 = M_PI / 180;
+		$lat *= $pi80;
+		$lng *= $pi80;
+		$cardLat *= $pi80;
+		$cardLng *= $pi80;
+ 
+		$r = 6372.797; // mean radius of Earth in km
+		$dlat = $cardLat - $lat;
+		$dlng = $cardLng - $lng;
+		$a = sin($dlat / 2) * sin($dlat / 2) + cos($lat) * cos($cardLat) * sin($dlng / 2) * sin($dlng / 2);
+		$c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+		$km = ($r * $c) * 1000;
+		
+		return $km;
 	}
 }
 ?>

@@ -11,6 +11,7 @@ $title = $_GET["title"];
 $email = $_GET["email"];
 $phone = $_GET["phone"];
 $address = $_GET["address"];
+$public = $_GET["public"];
 
 $businessCard = new BusinessCard();
 $businessCard->setUserId($userId);
@@ -18,6 +19,7 @@ $businessCard->setTitle($title);
 $businessCard->setEmail($email);
 $businessCard->setPhone($phone);
 $businessCard->setAddress($address);
+$businessCard->setPublic($public);
 $businessCard->save();
 
 $result["success"] = "true";
