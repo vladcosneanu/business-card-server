@@ -5,6 +5,9 @@ class User {
 	private $lastName;
 	private $username;
 	private $password;
+	private $lastLat;
+	private $lastLng;
+	private $lastGPSUpdate;
 	
 	public function setId($id) {
 		$this->id = $id;
@@ -44,6 +47,30 @@ class User {
 	
 	public function getPassword() {
 		return $this->password;
+	}
+	
+	public function setLastLat($lastLat) {
+		$this->lastLat = $lastLat;
+	}
+	
+	public function getLastLat() {
+		return $this->lastLat;
+	}
+	
+	public function setLastLng($lastLng) {
+		$this->lastLng = $lastLng;
+	}
+	
+	public function getLastLng() {
+		return $this->lastLng;
+	}
+	
+	public function setLastGPSUpdate($lastGPSUpdate) {
+		$this->lastGPSUpdate = $lastGPSUpdate;
+	}
+	
+	public function getLastGPSUpdate() {
+		return $this->lastGPSUpdate;
 	}
 	
 	public function save() {
@@ -122,6 +149,19 @@ class User {
 		}
 
 		return $savedCards;
+	}
+	
+	public function updateGPSLocation() {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		
+		$query = "UPDATE users 
+				  SET last_lat = '" . $this->getLastLat() . "', last_lng = '" . $this->getLastLng() . "', last_gps_update = '" . $this->getLastGPSUpdate() . "' 
+				  WHERE id = " . $this->getId() . ";";
+				  
+		if (!mysqli_query($link, $query)) {
+  			die('Error: ' . mysqli_error($link));
+		}
 	}
 }
 ?>
