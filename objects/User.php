@@ -194,11 +194,11 @@ class User {
 		$link = Database::getDBConnection();
 		
 		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, u.first_name, u.last_name, 
-						u.last_lat, u.last_lng
+						u.last_lat, u.last_lng 
 			      FROM business_cards bc
-				  LEFT JOIN users u ON bc.user_id = u.id
+				  LEFT JOIN users u ON bc.user_id = u.id 
 				  WHERE u.gcm_reg_id IS NOT NULL AND bc.public = 1 AND bc.user_id <> " . $userId . " AND u.last_lat IS NOT NULL AND u.last_lng IS NOT NULL;";
-				  $result = mysqli_query($link, $query);
+		$result = mysqli_query($link, $query);
 		
 		$matchingCards = array();
 		while($row = mysqli_fetch_array($result)) {
@@ -218,10 +218,23 @@ class User {
 			$matchingCards[] = $card;
 		}
 		
+		$query2 = "SELECT bc.id
+			      FROM users_cards uc
+				  LEFT JOIN business_cards bc ON bc.id = uc.card_id 
+				  WHERE uc.user_id = " . $userId . ";";
+		$result2 = mysqli_query($link, $query2);
+		
+		$alreadyAddedCardIds = array();
+		while($row = mysqli_fetch_array($result2)) {
+			$alreadyAddedCardIds[] = $row["id"];
+		}
+
 		$nearbyCards = array();
 		for ($i = 0; $i < count($matchingCards); $i++) {
 			$matchingCard = $matchingCards[$i];
-			if (User::getDistanceToCard($matchingCard, $lat, $lng) < $distance) {
+			$distanceToCard = User::getDistanceToCard($matchingCard, $lat, $lng);
+			if ($distanceToCard < $distance && !in_array($matchingCard->getId(), $alreadyAddedCardIds)) {
+				$matchingCard->setDistance($distanceToCard);
 				$nearbyCards[] = $matchingCard;
 			}
 			
@@ -229,8 +242,6 @@ class User {
 			//var_dump($matchingCard->getlastLat(), $matchingCard->getLastLng());
 			//var_dump(User::getDistanceToCard($matchingCard, $lat, $lng));
 		}
-		
-		//var_dump($nearbyCards);die;
 		
 		return $nearbyCards;
 	}
@@ -253,6 +264,17 @@ class User {
 		$km = ($r * $c) * 1000;
 		
 		return $km;
+	}
+	
+	public static function addPublicCard($userId, $cardId) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		$query = "INSERT INTO users_cards (user_id, card_id) 
+			VALUES (" . $userId . ", " . $cardId .  ")";
+		
+		if (!mysqli_query($link, $query)) {
+  			die('Error: ' . mysqli_error($link));
+		}
 	}
 }
 ?>

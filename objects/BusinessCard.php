@@ -11,6 +11,7 @@ class BusinessCard {
 	public $public;
 	private $lastLat;
 	private $lastLng;
+	public $distance;
 	
 	public function setId($id) {
 		$this->id = $id;
@@ -98,6 +99,14 @@ class BusinessCard {
 	
 	public function getLastLng() {
 		return $this->lastLng;
+	}
+	
+	public function setDistance($distance) {
+		$this->distance = $distance;
+	}
+	
+	public function getDistance() {
+		return $this->distance;
 	}
 	
 	public function save() {
