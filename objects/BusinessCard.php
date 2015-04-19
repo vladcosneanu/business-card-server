@@ -142,5 +142,16 @@ class BusinessCard {
   			die('Error: ' . mysqli_error($link));
 		}
 	}
+	
+	public function deleteSaved() {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		$query = "DELETE FROM users_cards 
+				  WHERE card_id = " . $this->getId() . " AND user_id = " . $this->getUserId() . ";";
+		
+		if (!mysqli_query($link, $query)) {
+  			die('Error: ' . mysqli_error($link));
+		}
+	}
 }
 ?>

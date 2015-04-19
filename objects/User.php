@@ -237,10 +237,6 @@ class User {
 				$matchingCard->setDistance($distanceToCard);
 				$nearbyCards[] = $matchingCard;
 			}
-			
-			//var_dump($lat, $lng);
-			//var_dump($matchingCard->getlastLat(), $matchingCard->getLastLng());
-			//var_dump(User::getDistanceToCard($matchingCard, $lat, $lng));
 		}
 		
 		return $nearbyCards;
@@ -275,6 +271,84 @@ class User {
 		if (!mysqli_query($link, $query)) {
   			die('Error: ' . mysqli_error($link));
 		}
+	}
+	
+	public static function getUserConferences($userId) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		include_once (Utils::$relativePath . "objects/Conference.php");
+		$link = Database::getDBConnection();
+		
+		$query = "SELECT c.id, c.name, c.location, c.date, c.passcode 
+			      FROM conferences_users cu 
+				  LEFT JOIN conferences c ON cu.conference_id = c.id 
+				  LEFT JOIN users u ON u.id = cu.user_id
+				  WHERE user_id = " . $userId . ";";
+		$result = mysqli_query($link, $query);
+		
+		$myConferences = array();
+		while($row = mysqli_fetch_array($result)) {
+			$conference = new Conference();
+			$conference->setId($row["id"]);
+			$conference->setName($row["name"]);
+			$conference->setLocation($row["location"]);
+			$conference->setDate($row["date"]);
+			$conference->setPasscode($row["passcode"]);
+			
+			$myConferences[] = $conference;
+		}
+
+		return $myConferences;
+	}
+	
+	public static function getConferenceCards($userId, $conferenceId) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		include_once (Utils::$relativePath . "objects/BusinessCard.php");
+		$link = Database::getDBConnection();
+		
+		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, u.first_name, u.last_name 
+			      FROM business_cards bc 
+				  LEFT JOIN users u ON bc.user_id = u.id 
+				  LEFT JOIN conferences_users cu ON cu.user_id = u.id 
+				  WHERE cu.conference_id = " . $conferenceId . " AND cu.user_id <> " . $userId . ";";
+
+		$result = mysqli_query($link, $query);
+		
+		$matchingCards = array();
+		while($row = mysqli_fetch_array($result)) {
+			$card = new BusinessCard();
+			$card->setId($row["id"]);
+			$card->setUserId($row["user_id"]);
+			$card->setTitle($row["title"]);
+			$card->setEmail($row["email"]);
+			$card->setPhone($row["phone"]);
+			$card->setAddress($row["address"]);
+			$card->setPublic($row["public"]);
+			$card->setFirstName($row["first_name"]);
+			$card->setLastName($row["last_name"]);
+			
+			$matchingCards[] = $card;
+		}
+		
+		$query2 = "SELECT bc.id
+			      FROM users_cards uc
+				  LEFT JOIN business_cards bc ON bc.id = uc.card_id 
+				  WHERE uc.user_id = " . $userId . ";";
+		$result2 = mysqli_query($link, $query2);
+		
+		$alreadyAddedCardIds = array();
+		while($row = mysqli_fetch_array($result2)) {
+			$alreadyAddedCardIds[] = $row["id"];
+		}
+		
+		$conferenceCards = array();
+		for ($i = 0; $i < count($matchingCards); $i++) {
+			$matchingCard = $matchingCards[$i];
+			if (!in_array($matchingCard->getId(), $alreadyAddedCardIds)) {
+				$conferenceCards[] = $matchingCard;
+			}
+		}
+		
+		return $conferenceCards;
 	}
 }
 ?>
