@@ -123,6 +123,7 @@ class User {
 			$card->setPhone($row["phone"]);
 			$card->setAddress($row["address"]);
 			$card->setPublic($row["public"]);
+			$card->setLayout($row["layout"]);
 			
 			$myCards[] = $card;
 		}
@@ -135,7 +136,7 @@ class User {
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
 		$link = Database::getDBConnection();
 		
-		$query = "SELECT bc.user_id, uc.card_id, bc.title, bc.email, bc.phone, bc.address, bc.public, u.first_name, u.last_name, u.username
+		$query = "SELECT bc.user_id, uc.card_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name, u.username
 				  FROM users_cards uc
 			      LEFT JOIN business_cards bc ON uc.card_id = bc.id 
 				  LEFT JOIN users u ON bc.user_id = u.id 
@@ -155,6 +156,7 @@ class User {
 			$card->setPublic($row["public"]);
 			$card->setFirstName($row["first_name"]);
 			$card->setLastName($row["last_name"]);
+			$card->setLayout($row["layout"]);
 			
 			$savedCards[] = $card;
 		}
@@ -193,7 +195,7 @@ class User {
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
 		$link = Database::getDBConnection();
 		
-		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, u.first_name, u.last_name, 
+		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name, 
 						u.last_lat, u.last_lng 
 			      FROM business_cards bc
 				  LEFT JOIN users u ON bc.user_id = u.id 
@@ -214,6 +216,7 @@ class User {
 			$card->setLastName($row["last_name"]);
 			$card->setLastLat($row["last_lat"]);
 			$card->setLastLng($row["last_lng"]);
+			$card->setLayout($row["layout"]);
 			
 			$matchingCards[] = $card;
 		}
@@ -305,7 +308,7 @@ class User {
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
 		$link = Database::getDBConnection();
 		
-		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, u.first_name, u.last_name 
+		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name 
 			      FROM business_cards bc 
 				  LEFT JOIN users u ON bc.user_id = u.id 
 				  LEFT JOIN conferences_users cu ON cu.user_id = u.id 
@@ -325,6 +328,7 @@ class User {
 			$card->setPublic($row["public"]);
 			$card->setFirstName($row["first_name"]);
 			$card->setLastName($row["last_name"]);
+			$card->setLayout($row["layout"]);
 			
 			$matchingCards[] = $card;
 		}

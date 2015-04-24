@@ -12,6 +12,7 @@ class BusinessCard {
 	private $lastLat;
 	private $lastLng;
 	public $distance;
+	public $layout;
 	
 	public function setId($id) {
 		$this->id = $id;
@@ -109,11 +110,19 @@ class BusinessCard {
 		return $this->distance;
 	}
 	
+	public function setLayout($layout) {
+		$this->layout = $layout;
+	}
+	
+	public function getLayout() {
+		return $this->layout;
+	}
+	
 	public function save() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
-		$query = "INSERT INTO business_cards (user_id, title,  email, phone, address, public) 
-			VALUES ('" . $this->getUserId() . "', '" . $this->getTitle() . "', '" . $this->getEmail() . "', '" . $this->getPhone() . "','" . $this->getAddress() . "', " . $this->getPublic() . ")";
+		$query = "INSERT INTO business_cards (user_id, title,  email, phone, address, layout, public) 
+			VALUES ('" . $this->getUserId() . "', '" . $this->getTitle() . "', '" . $this->getEmail() . "', '" . $this->getPhone() . "','" . $this->getAddress() . "', " . $this->getLayout() . ", " . $this->getPublic() . ")";
 		
 		if (!mysqli_query($link, $query)) {
   			die('Error: ' . mysqli_error($link));
@@ -124,7 +133,7 @@ class BusinessCard {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
 		$query = "UPDATE business_cards
-			      SET title = '" . $this->getTitle() . "', email = '" . $this->getEmail() . "', phone = '" . $this->getPhone() . "', address = '" . $this->getAddress() . "', public = " . $this->getPublic() . "
+			      SET title = '" . $this->getTitle() . "', email = '" . $this->getEmail() . "', phone = '" . $this->getPhone() . "', address = '" . $this->getAddress() . "', layout = " . $this->getLayout() . ", public = " . $this->getPublic() . "
 				  WHERE id = " . $this->getId() . " AND user_id = " . $this->getUserId() . ";";
 		
 		if (!mysqli_query($link, $query)) {
