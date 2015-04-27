@@ -118,6 +118,29 @@ class BusinessCard {
 		return $this->layout;
 	}
 	
+	public static function getById($cardId) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		$query = "SELECT * 
+			      FROM business_cards 
+				  WHERE id = " . $cardId . ";";
+		$result = mysqli_query($link, $query);
+
+		$card = new BusinessCard();
+		while($row = mysqli_fetch_array($result)) {
+			$card->setId($row["id"]);
+			$card->setUserId($row["user_id"]);
+			$card->setTitle($row["title"]);
+			$card->setEmail($row["email"]);
+			$card->setPhone($row["phone"]);
+			$card->setAddress($row["address"]);
+			$card->setPublic($row["public"]);
+			$card->setLayout($row["layout"]);
+		}
+		
+		return $card;
+	}
+	
 	public function save() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();

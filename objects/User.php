@@ -92,6 +92,29 @@ class User {
   			die('Error aici: ' . mysqli_error($link));
 		}
 	}
+	
+	public static function getById($userId) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		$query = "SELECT * 
+			      FROM users 
+				  WHERE id = " . $userId . ";";
+		$result = mysqli_query($link, $query);
+
+		$user = new User();
+		while($row = mysqli_fetch_array($result)) {
+			$user->setId($userId);
+			$user->setFirstName($row["first_name"]);
+			$user->setLastName($row["last_name"]);
+			$user->setUsername($row["username"]);
+			$user->setLastLat($row["last_lat"]);
+			$user->setLastLng($row["last_lng"]);
+			$user->setLastGPSUpdate($row["last_gps_update"]);
+			$user->setGCMRegId($row["gcm_reg_id"]);
+		}
+		
+		return $user;
+	}
 
 	public static function isUsernameAvailable($username){
 		include_once (Utils::$relativePath . "db/db_connection.php");
