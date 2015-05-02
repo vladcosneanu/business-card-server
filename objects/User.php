@@ -299,6 +299,35 @@ class User {
 		}
 	}
 	
+	public static function joinConference($userId, $passcode) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		include_once (Utils::$relativePath . "objects/Conference.php");
+		$link = Database::getDBConnection();
+		
+		$conference = Conference::getByPasscode($passcode);
+		if ($conference->getId() == -1) {
+			return "Conference does not exist";
+		}
+		
+		$query = "SELECT * 
+			      FROM conferences_users 
+				  WHERE conference_id = " . $conference->getId() . " AND user_id = " . $userId . ";";
+		$result = mysqli_query($link, $query);
+		
+		while($row = mysqli_fetch_array($result)) {
+			return "User already added to conference";
+		}
+		
+		$query2 = "INSERT INTO conferences_users (conference_id, user_id) 
+			VALUES (" . $conference->getId() . ", " . $userId .  ")";
+		
+		if (!mysqli_query($link, $query2)) {
+  			die('Error: ' . mysqli_error($link));
+		}
+		
+		return $conference->getName();
+	}
+	
 	public static function getUserConferences($userId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/Conference.php");
