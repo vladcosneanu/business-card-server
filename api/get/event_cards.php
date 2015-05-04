@@ -7,8 +7,8 @@ $link = Database::getDBConnection();
 include_once ("../../objects/User.php");
 
 $userId =  $_GET["user_id"];
-$conferenceId = $_GET["conference_id"];
-$conferenceCards = User::getConferenceCards($userId, $conferenceId);
+$eventId = $_GET["event_id"];
+$eventCards = User::getEventCards($userId, $eventId);
 
-echo json_encode($conferenceCards);
+echo json_encode($eventCards);
 ?>

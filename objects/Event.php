@@ -1,5 +1,5 @@
 <?php
-class Conference {
+class Event {
 	public $id;
 	public $name;
 	public $location;
@@ -50,28 +50,28 @@ class Conference {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
 		$query = "SELECT * 
-			      FROM conferences 
+			      FROM events 
 				  WHERE passcode = '" . $passcode . "';";
 		$result = mysqli_query($link, $query);
 
-		$conference = new Conference();
-		$conference->setId(-1);
+		$event = new Event();
+		$event->setId(-1);
 		while($row = mysqli_fetch_array($result)) {
-			$conference->setId($row["id"]);
-			$conference->setName($row["name"]);
-			$conference->setLocation($row["location"]);
-			$conference->setDate($row["date"]);
-			$conference->setPasscode($row["passcode"]);
+			$event->setId($row["id"]);
+			$event->setName($row["name"]);
+			$event->setLocation($row["location"]);
+			$event->setDate($row["date"]);
+			$event->setPasscode($row["passcode"]);
 		}
 		
-		return $conference;
+		return $event;
 	}
 	
-	public static function deleteJoined($userId, $conferenceId) {
+	public static function deleteJoined($userId, $eventId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
-		$query = "DELETE FROM conferences_users 
-				  WHERE user_id = " . $userId . " AND conference_id = " . $conferenceId . ";";
+		$query = "DELETE FROM events_users 
+				  WHERE user_id = " . $userId . " AND event_id = " . $eventId . ";";
 		
 		if (!mysqli_query($link, $query)) {
   			die('Error: ' . mysqli_error($link));

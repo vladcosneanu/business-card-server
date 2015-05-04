@@ -299,63 +299,63 @@ class User {
 		}
 	}
 	
-	public static function joinConference($userId, $passcode) {
+	public static function joinEvent($userId, $passcode) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
-		include_once (Utils::$relativePath . "objects/Conference.php");
+		include_once (Utils::$relativePath . "objects/Event.php");
 		$link = Database::getDBConnection();
 		
-		$conference = Conference::getByPasscode($passcode);
-		if ($conference->getId() == -1) {
-			return "Conference does not exist";
+		$event = Event::getByPasscode($passcode);
+		if ($event->getId() == -1) {
+			return "Event does not exist";
 		}
 		
 		$query = "SELECT * 
-			      FROM conferences_users 
-				  WHERE conference_id = " . $conference->getId() . " AND user_id = " . $userId . ";";
+			      FROM events_users 
+				  WHERE event_id = " . $event->getId() . " AND user_id = " . $userId . ";";
 		$result = mysqli_query($link, $query);
 		
 		while($row = mysqli_fetch_array($result)) {
-			return "User already added to conference";
+			return "User already added to event";
 		}
 		
-		$query2 = "INSERT INTO conferences_users (conference_id, user_id) 
-			VALUES (" . $conference->getId() . ", " . $userId .  ")";
+		$query2 = "INSERT INTO events_users (event_id, user_id) 
+			VALUES (" . $event->getId() . ", " . $userId .  ")";
 		
 		if (!mysqli_query($link, $query2)) {
   			die('Error: ' . mysqli_error($link));
 		}
 		
-		return $conference->getName();
+		return $event->getName();
 	}
 	
-	public static function getUserConferences($userId) {
+	public static function getUserEvents($userId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
-		include_once (Utils::$relativePath . "objects/Conference.php");
+		include_once (Utils::$relativePath . "objects/Event.php");
 		$link = Database::getDBConnection();
 		
 		$query = "SELECT c.id, c.name, c.location, c.date, c.passcode 
-			      FROM conferences_users cu 
-				  LEFT JOIN conferences c ON cu.conference_id = c.id 
+			      FROM events_users cu 
+				  LEFT JOIN events c ON cu.event_id = c.id 
 				  LEFT JOIN users u ON u.id = cu.user_id
 				  WHERE user_id = " . $userId . ";";
 		$result = mysqli_query($link, $query);
 		
-		$myConferences = array();
+		$myEvents = array();
 		while($row = mysqli_fetch_array($result)) {
-			$conference = new Conference();
-			$conference->setId($row["id"]);
-			$conference->setName($row["name"]);
-			$conference->setLocation($row["location"]);
-			$conference->setDate($row["date"]);
-			$conference->setPasscode($row["passcode"]);
+			$event = new Event();
+			$event->setId($row["id"]);
+			$event->setName($row["name"]);
+			$event->setLocation($row["location"]);
+			$event->setDate($row["date"]);
+			$event->setPasscode($row["passcode"]);
 			
-			$myConferences[] = $conference;
+			$myEvents[] = $event;
 		}
 
-		return $myConferences;
+		return $myEvents;
 	}
 	
-	public static function getConferenceCards($userId, $conferenceId) {
+	public static function getEventCards($userId, $eventId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
 		$link = Database::getDBConnection();
@@ -363,8 +363,8 @@ class User {
 		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name 
 			      FROM business_cards bc 
 				  LEFT JOIN users u ON bc.user_id = u.id 
-				  LEFT JOIN conferences_users cu ON cu.user_id = u.id 
-				  WHERE cu.conference_id = " . $conferenceId . " AND cu.user_id <> " . $userId . ";";
+				  LEFT JOIN events_users cu ON cu.user_id = u.id 
+				  WHERE cu.event_id = " . $eventId . " AND cu.user_id <> " . $userId . ";";
 
 		$result = mysqli_query($link, $query);
 		
@@ -396,15 +396,15 @@ class User {
 			$alreadyAddedCardIds[] = $row["id"];
 		}
 		
-		$conferenceCards = array();
+		$eventCards = array();
 		for ($i = 0; $i < count($matchingCards); $i++) {
 			$matchingCard = $matchingCards[$i];
 			if (!in_array($matchingCard->getId(), $alreadyAddedCardIds)) {
-				$conferenceCards[] = $matchingCard;
+				$eventCards[] = $matchingCard;
 			}
 		}
 		
-		return $conferenceCards;
+		return $eventCards;
 	}
 }
 ?>
