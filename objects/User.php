@@ -200,6 +200,19 @@ class User {
 		}
 	}
 	
+	public function updateLogout() {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		
+		$query = "UPDATE users 
+				  SET last_lat = NULL, last_lng = NULL, last_gps_update = NULL, gcm_reg_id = NULL 
+				  WHERE id = " . $this->getId() . ";";
+				  
+		if (!mysqli_query($link, $query)) {
+  			die('Error: ' . mysqli_error($link));
+		}
+	}
+	
 	public function updateGCMRegId() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
