@@ -46,6 +46,29 @@ class Event {
 		return $this->passcode;
 	}
 	
+	public function save() {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		$query = "INSERT INTO events (name, location, date, passcode) 
+			VALUES ('" . $this->getName() . "', '" . $this->getLocation() . "', '" . $this->getDate() . "', '" . $this->getPasscode() . "')";
+		
+		if (!mysqli_query($link, $query)) {
+  			die('Error: ' . mysqli_error($link));
+		}
+	}
+	
+	public static function isPasscodeAvailable($passcode){
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		$query = "SELECT * FROM events WHERE passcode = '" . $passcode . "';";
+		$result = mysqli_query($link, $query);
+		
+		while($row = mysqli_fetch_array($result)) {
+			return false;
+		}
+		return true;
+	}
+	
 	public static function getByPasscode($passcode) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
