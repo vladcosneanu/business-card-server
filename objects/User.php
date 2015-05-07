@@ -1,14 +1,15 @@
 <?php
 class User {
-	private $id;
-	private $firstName;
-	private $lastName;
-	private $username;
-	private $password;
-	private $lastLat;
-	private $lastLng;
-	private $lastGPSUpdate;
-	private $gcmRegId;
+	public $id;
+	public $firstName;
+	public $lastName;
+	public $username;
+	public $password;
+	public $lastLat;
+	public $lastLng;
+	public $lastGPSUpdate;
+	public $gcmRegId;
+	public $distance;
 	
 	public function setId($id) {
 		$this->id = $id;
@@ -80,6 +81,14 @@ class User {
 	
 	public function getGCMRegId() {
 		return $this->gcmRegId;
+	}
+	
+	public function setDistance($distance) {
+		$this->distance = $distance;
+	}
+	
+	public function getDistance() {
+		return $this->distance;
 	}
 	
 	public function save() {
@@ -226,6 +235,96 @@ class User {
 		}
 	}
 	
+	public static function getShareUsers($userId, $distance, $lat, $lng) {
+		include_once (Utils::$relativePath . "db/db_connection.php");
+		$link = Database::getDBConnection();
+		
+		$querySelectUsersEvents = "SELECT event_id 
+				  FROM events_users 
+				  WHERE user_id = " . $userId . "";
+				  
+		$queryUsersFromEvents = "SELECT DISTINCT user_id 
+				  FROM events_users 
+				  WHERE event_id in(" . $querySelectUsersEvents . ") AND user_id <> " . $userId . ";";
+		$result = mysqli_query($link, $queryUsersFromEvents);  
+		
+		$userIdsFromEvents = array(); // need to be added to the final list
+		while($row = mysqli_fetch_array($result)) {
+			$userIdsFromEvents[] = $row["user_id"];
+		}
+		
+		if (count($userIdsFromEvents) > 0) {	
+			$userIdsFromEventsString = "";
+			for ($i = 0; $i < count($userIdsFromEvents); $i++) {
+				if ($i == (count($userIdsFromEvents) - 1)) {
+					// last element from list
+					$userIdsFromEventsString .= $userIdsFromEvents[$i];
+				} else {
+					$userIdsFromEventsString .= $userIdsFromEvents[$i] . ", ";
+				}
+			}
+		
+			$queryEventsUsers = "SELECT * 
+				  FROM users 
+				  WHERE id IN (" . $userIdsFromEventsString . ") AND last_lat IS NOT NULL AND last_lng IS NOT NULL AND gcm_reg_id IS NOT NULL;";	  
+			$result3 = mysqli_query($link, $queryEventsUsers);
+		
+			$eventsUsers = array();
+			while($row = mysqli_fetch_array($result3)) {
+				$user = new User();
+				$user->setId($row["id"]);
+				$user->setFirstName($row["first_name"]);
+				$user->setLastName($row["last_name"]);
+				$user->setUsername($row["username"]);
+				$user->setLastLat($row["last_lat"]);
+				$user->setLastLng($row["last_lng"]);
+				$user->setLastGPSUpdate($row["last_gps_update"]);
+				$user->setGCMRegId($row["gcm_reg_id"]);
+				$eventsUsers[] = $user;
+			}
+		}
+		
+		$userIdsFromEventsString = "";
+		for ($i = 0; $i < count($userIdsFromEvents); $i++) {
+			$userIdsFromEventsString .= $userIdsFromEvents[$i] . ", ";
+		}
+		
+		$userIdsFromEventsString .= $userId;
+		
+		$queryNearbyUsers = "SELECT * 
+				  FROM users 
+				  WHERE id NOT IN (" . $userIdsFromEventsString . ") AND last_lat IS NOT NULL AND last_lng IS NOT NULL AND gcm_reg_id IS NOT NULL;";
+		$result2 = mysqli_query($link, $queryNearbyUsers);
+		
+		$allUsers = array();
+		while($row = mysqli_fetch_array($result2)) {
+			$user = new User();
+			$user->setId($row["id"]);
+			$user->setFirstName($row["first_name"]);
+			$user->setLastName($row["last_name"]);
+			$user->setUsername($row["username"]);
+			$user->setLastLat($row["last_lat"]);
+			$user->setLastLng($row["last_lng"]);
+			$user->setLastGPSUpdate($row["last_gps_update"]);
+			$user->setGCMRegId($row["gcm_reg_id"]);
+			$allUsers[] = $user;
+		}
+		
+		$nearbyUsers = array();
+		for ($i = 0; $i < count($allUsers); $i++) {
+			$user = $allUsers[$i];
+			$distanceToUser = User::getDistanceToUser($user, $lat, $lng);
+			if ($distanceToUser < $distance) {
+				$user->setDistance($distanceToUser);
+				$nearbyUsers[] = $user;
+			}
+		}
+
+		$users = array_merge($eventsUsers, $nearbyUsers);
+		
+		return $users;
+	}
+	
 	public static function getNearbyCards($userId, $distance, $lat, $lng) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
@@ -295,6 +394,26 @@ class User {
 		$dlat = $cardLat - $lat;
 		$dlng = $cardLng - $lng;
 		$a = sin($dlat / 2) * sin($dlat / 2) + cos($lat) * cos($cardLat) * sin($dlng / 2) * sin($dlng / 2);
+		$c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+		$km = ($r * $c) * 1000;
+		
+		return $km;
+	}
+	
+	private static function getDistanceToUser($user, $lat, $lng) {
+		$userLat = $user->getLastLat();
+		$userLng = $user->getLastLng();
+		
+		$pi80 = M_PI / 180;
+		$lat *= $pi80;
+		$lng *= $pi80;
+		$userLat *= $pi80;
+		$userLng *= $pi80;
+ 
+		$r = 6372.797; // mean radius of Earth in km
+		$dlat = $userLat - $lat;
+		$dlng = $userLng - $lng;
+		$a = sin($dlat / 2) * sin($dlat / 2) + cos($lat) * cos($userLat) * sin($dlng / 2) * sin($dlng / 2);
 		$c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 		$km = ($r * $c) * 1000;
 		
