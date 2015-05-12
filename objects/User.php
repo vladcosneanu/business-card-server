@@ -423,10 +423,20 @@ class User {
 	public static function addPublicCard($userId, $cardId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
-		$query = "INSERT INTO users_cards (user_id, card_id) 
+		
+		$query = "SELECT * 
+			      FROM users_cards 
+				  WHERE user_id = " . $userId . " AND card_id = " . $cardId . ";";
+		$result = mysqli_query($link, $query);
+		
+		while($row = mysqli_fetch_array($result)) {
+			return "User already has access to this card";
+		}
+		
+		$query2 = "INSERT INTO users_cards (user_id, card_id) 
 			VALUES (" . $userId . ", " . $cardId .  ")";
 		
-		if (!mysqli_query($link, $query)) {
+		if (!mysqli_query($link, $query2)) {
   			die('Error: ' . mysqli_error($link));
 		}
 	}
