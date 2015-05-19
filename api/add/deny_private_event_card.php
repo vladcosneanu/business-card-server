@@ -21,7 +21,7 @@ $message = $cardUser->getFirstName() . " " . $cardUser->getLastName() . " has de
 
 $gcpm = new GCMPushMessage($apiKey);
 $gcpm->setDevices($devices);
-$response = $gcpm->send($message, array('title' => 'Business Card request declined'));
+$response = $gcpm->send($message, array('title' => 'Business Card access declined'));
 
 echo $response;
 ?>

@@ -23,7 +23,7 @@ $message = $cardUser->getFirstName() . " " . $cardUser->getLastName() . " has gi
 
 $gcpm = new GCMPushMessage($apiKey);
 $gcpm->setDevices($devices);
-$response = $gcpm->send($message, array('title' => 'Business Card request granted'));
+$response = $gcpm->send($message, array('title' => 'Business Card access granted'));
 
 echo $response;
 ?>
