@@ -5,9 +5,8 @@ include_once ('../../db/db_connection.php');
 $link = Database::getDBConnection();
 
 include_once ("../../objects/User.php");
-include_once ("../../objects/BusinessCard.php");
-include_once ("../gcm/GCMPushMessage.php");
 
+// extract the request variables
 $userId = $_GET["user_id"];
 $cardId = $_GET["card_id"];
 

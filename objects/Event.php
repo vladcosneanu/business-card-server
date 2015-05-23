@@ -57,6 +57,7 @@ class Event {
 		}
 	}
 	
+	// check if a passcode is available
 	public static function isPasscodeAvailable($passcode){
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -69,6 +70,7 @@ class Event {
 		return true;
 	}
 	
+	// get an event by its passcode
 	public static function getByPasscode($passcode) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -90,6 +92,7 @@ class Event {
 		return $event;
 	}
 	
+	// remove a user as a participant to an event
 	public static function deleteJoined($userId, $eventId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();

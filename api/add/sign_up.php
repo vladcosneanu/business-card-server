@@ -7,6 +7,7 @@ $link = Database::getDBConnection();
 include_once ("../../objects/User.php");
 include_once ("../../objects/BusinessCard.php");
 
+// extract the request variables
 $title = $_GET["title"];
 $firstName = $_GET["first_name"];
 $lastName = $_GET["last_name"];
@@ -17,10 +18,12 @@ $password = $_GET["password"];
 $public = $_GET["public"];
 $layout = $_GET["layout"];
 
+// check it the username is available
 $available = User::isUsernameAvailable($username);
 
 $result = array();
 if ($available) {
+	// username is available, create the user
 	$user = new User();
 	$user->setFirstName($firstName);
 	$user->setLastName($lastName);
@@ -28,6 +31,7 @@ if ($available) {
 	$user->setPassword($password);
 	$user->save();
 	
+	// extract the id from the database, for the saved user
 	$query = "SELECT * FROM users WHERE username = '" . $username . "' AND password = SHA1('" . $password . "');";
 	$queryResult = mysqli_query($link, $query);
 
@@ -37,6 +41,7 @@ if ($available) {
 		$user->setId($row["id"]);
 	}
 	
+	// create the user's first business card
 	$businessCard = new BusinessCard();
 	$businessCard->setUserId($user->getId());
 	$businessCard->setTitle($title);

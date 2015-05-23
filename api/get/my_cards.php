@@ -6,7 +6,10 @@ $link = Database::getDBConnection();
 
 include_once ("../../objects/User.php");
 
+// extract the request variables
 $userId = $_GET["user_id"];
+
+// get the user's cards
 $myCards = User::getMyCards($userId);
 
 echo json_encode($myCards);

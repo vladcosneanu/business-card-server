@@ -6,9 +6,11 @@ $link = Database::getDBConnection();
 
 include_once ("../../objects/BusinessCard.php");
 
+// extract the request variables
 $cardId = $_GET["card_id"];
 $userId = $_GET["user_id"];
 
+// delete a user's saved card
 $businessCard = new BusinessCard();
 $businessCard->setId($cardId);
 $businessCard->setUserId($userId);

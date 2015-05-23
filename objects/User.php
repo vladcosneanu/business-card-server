@@ -102,6 +102,7 @@ class User {
 		}
 	}
 	
+	// retrieve a user from the DB by his id
 	public static function getById($userId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -125,6 +126,7 @@ class User {
 		return $user;
 	}
 
+	// check if a username is available (for sign-up)
 	public static function isUsernameAvailable($username){
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -137,6 +139,7 @@ class User {
 		return true;
 	}
 	
+	// get the user's cards
 	public static function getMyCards($userId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
@@ -163,6 +166,7 @@ class User {
 		return $myCards;
 	}
 	
+	// get the user's saved cards
 	public static function getSavedCards($userId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
@@ -196,6 +200,7 @@ class User {
 		return $savedCards;
 	}
 	
+	// update the user's GPS location
 	public function updateGPSLocation() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -209,6 +214,7 @@ class User {
 		}
 	}
 	
+	// update the user's data when he logs out
 	public function updateLogout() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -222,6 +228,7 @@ class User {
 		}
 	}
 	
+	// update the user's GCM registration id
 	public function updateGCMRegId() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -235,6 +242,7 @@ class User {
 		}
 	}
 	
+	// get the available users that the user can share a card to
 	public static function getShareUsers($userId, $distance, $lat, $lng) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -325,6 +333,7 @@ class User {
 		return $users;
 	}
 	
+	// get the nearby cards for the user
 	public static function getNearbyCards($userId, $distance, $lat, $lng) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
@@ -380,6 +389,7 @@ class User {
 		return $nearbyCards;
 	}
 	
+	// get the distance to a card
 	private static function getDistanceToCard($card, $lat, $lng) {
 		$cardLat = $card->getLastLat();
 		$cardLng = $card->getLastLng();
@@ -400,26 +410,7 @@ class User {
 		return $km;
 	}
 	
-	private static function getDistanceToUser($user, $lat, $lng) {
-		$userLat = $user->getLastLat();
-		$userLng = $user->getLastLng();
-		
-		$pi80 = M_PI / 180;
-		$lat *= $pi80;
-		$lng *= $pi80;
-		$userLat *= $pi80;
-		$userLng *= $pi80;
- 
-		$r = 6372.797; // mean radius of Earth in km
-		$dlat = $userLat - $lat;
-		$dlng = $userLng - $lng;
-		$a = sin($dlat / 2) * sin($dlat / 2) + cos($lat) * cos($userLat) * sin($dlng / 2) * sin($dlng / 2);
-		$c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-		$km = ($r * $c) * 1000;
-		
-		return $km;
-	}
-	
+	// add a public card to Saved Cards
 	public static function addPublicCard($userId, $cardId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -441,6 +432,7 @@ class User {
 		}
 	}
 	
+	// join an event
 	public static function joinEvent($userId, $passcode) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/Event.php");
@@ -470,6 +462,7 @@ class User {
 		return $event->getName();
 	}
 	
+	// get the user's events
 	public static function getUserEvents($userId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/Event.php");
@@ -497,6 +490,7 @@ class User {
 		return $myEvents;
 	}
 	
+	// get the cards from an event, for a selected user
 	public static function getEventCards($userId, $eventId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");

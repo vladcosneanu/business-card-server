@@ -6,8 +6,10 @@ $link = Database::getDBConnection();
 
 include_once ("../../objects/User.php");
 
+// extract the request variables
 $id = $_GET["id"];
 
+// update the user for logout scenario
 $user = new User();
 $user->setId($id);
 $user->updateLogout();

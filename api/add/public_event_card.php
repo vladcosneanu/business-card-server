@@ -6,6 +6,7 @@ $link = Database::getDBConnection();
 
 include_once ("../../objects/User.php");
 
+// extract the request variables
 $userId = $_GET["user_id"];
 $cardId = $_GET["card_id"];
 

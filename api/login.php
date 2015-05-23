@@ -4,9 +4,11 @@ Utils::$relativePath = "../";
 include_once ('../db/db_connection.php');
 $link = Database::getDBConnection();
 
+// extract the request variables
 $username = $_GET["username"];
 $password = $_GET["password"];
 
+// get the user (if it exists) from the database
 $query = "SELECT * FROM users WHERE username = '" . $username . "' AND password = SHA1('" . $password . "');";
 $result = mysqli_query($link, $query);
 $user = array();

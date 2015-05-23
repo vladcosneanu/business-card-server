@@ -6,11 +6,13 @@ $link = Database::getDBConnection();
 
 include_once ("../../objects/User.php");
 
+// extract the request variables
 $id = $_GET["id"];
 $lastLat = $_GET["lat"];
 $lastLng = $_GET["lng"];
 $timestamp = $_GET["timestamp"];
 
+// update the user's GPS location
 $user = new User();
 $user->setId($id);
 $user->setLastLat($lastLat);

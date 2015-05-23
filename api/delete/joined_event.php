@@ -6,6 +6,7 @@ $link = Database::getDBConnection();
 
 include_once ("../../objects/Event.php");
 
+// extract the request variables
 $eventId = $_GET["event_id"];
 $userId = $_GET["user_id"];
 

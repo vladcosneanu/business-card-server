@@ -118,6 +118,7 @@ class BusinessCard {
 		return $this->layout;
 	}
 	
+	// get a card from the database, by its id
 	public static function getById($cardId) {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
@@ -175,6 +176,7 @@ class BusinessCard {
 		}
 	}
 	
+	// delete a card from a user's Saved Cards list
 	public function deleteSaved() {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();

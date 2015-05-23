@@ -6,6 +6,7 @@ $link = Database::getDBConnection();
 
 include_once ("../../objects/BusinessCard.php");
 
+// extract the request variables
 $userId = $_GET["user_id"];
 $title = $_GET["title"];
 $email = $_GET["email"];
@@ -14,6 +15,7 @@ $address = $_GET["address"];
 $public = $_GET["public"];
 $layout = $_GET["layout"];
 
+// save the business card
 $businessCard = new BusinessCard();
 $businessCard->setUserId($userId);
 $businessCard->setTitle($title);
