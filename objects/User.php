@@ -389,6 +389,26 @@ class User {
 		return $nearbyCards;
 	}
 	
+	private static function getDistanceToUser($user, $lat, $lng) {
+		$userLat = $user->getLastLat();
+		$userLng = $user->getLastLng();
+		
+		$pi80 = M_PI / 180;
+		$lat *= $pi80;
+		$lng *= $pi80;
+		$userLat *= $pi80;
+		$userLng *= $pi80;
+ 
+		$r = 6372.797; // mean radius of Earth in km
+		$dlat = $userLat - $lat;
+		$dlng = $userLng - $lng;
+		$a = sin($dlat / 2) * sin($dlat / 2) + cos($lat) * cos($userLat) * sin($dlng / 2) * sin($dlng / 2);
+		$c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+		$km = ($r * $c) * 1000;
+		
+		return $km;
+	}
+	
 	// get the distance to a card
 	private static function getDistanceToCard($card, $lat, $lng) {
 		$cardLat = $card->getLastLat();
