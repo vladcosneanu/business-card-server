@@ -247,21 +247,24 @@ class User {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
 		
+		// setup the query for selecting all the event ids that the user participated at
 		$querySelectUsersEvents = "SELECT event_id 
 				  FROM events_users 
 				  WHERE user_id = " . $userId . "";
 				  
+		// get all the user ids from the above events
 		$queryUsersFromEvents = "SELECT DISTINCT user_id 
 				  FROM events_users 
 				  WHERE event_id in(" . $querySelectUsersEvents . ") AND user_id <> " . $userId . ";";
 		$result = mysqli_query($link, $queryUsersFromEvents);  
 		
-		$userIdsFromEvents = array(); // need to be added to the final list
+		$userIdsFromEvents = array();
 		while($row = mysqli_fetch_array($result)) {
 			$userIdsFromEvents[] = $row["user_id"];
 		}
 		
 		if (count($userIdsFromEvents) > 0) {	
+			// there are users from events that can be displayed in the share dialog
 			$userIdsFromEventsString = "";
 			for ($i = 0; $i < count($userIdsFromEvents); $i++) {
 				if ($i == (count($userIdsFromEvents) - 1)) {
@@ -272,12 +275,13 @@ class User {
 				}
 			}
 		
+			// setup the query for getting the details for the users that participated at the same events
 			$queryEventsUsers = "SELECT * 
 				  FROM users 
 				  WHERE id IN (" . $userIdsFromEventsString . ") AND last_lat IS NOT NULL AND last_lng IS NOT NULL AND gcm_reg_id IS NOT NULL;";	  
 			$result3 = mysqli_query($link, $queryEventsUsers);
-		
-			$eventsUsers = array();
+			
+			$eventsUsers = array(); // this holds the users and their details
 			while($row = mysqli_fetch_array($result3)) {
 				$user = new User();
 				$user->setId($row["id"]);
@@ -292,6 +296,7 @@ class User {
 			}
 		}
 		
+		// create a string of user ids that will be eliminated in the next query
 		$userIdsFromEventsString = "";
 		for ($i = 0; $i < count($userIdsFromEvents); $i++) {
 			$userIdsFromEventsString .= $userIdsFromEvents[$i] . ", ";
@@ -299,12 +304,13 @@ class User {
 		
 		$userIdsFromEventsString .= $userId;
 		
+		// setup the query for getting all the users that have valid GPS coordinates, and are not already retrieved from the events section (as above)
 		$queryNearbyUsers = "SELECT * 
 				  FROM users 
 				  WHERE id NOT IN (" . $userIdsFromEventsString . ") AND last_lat IS NOT NULL AND last_lng IS NOT NULL AND gcm_reg_id IS NOT NULL;";
 		$result2 = mysqli_query($link, $queryNearbyUsers);
 		
-		$allUsers = array();
+		$allUsers = array(); // this holds all the users that have valid GPS information
 		while($row = mysqli_fetch_array($result2)) {
 			$user = new User();
 			$user->setId($row["id"]);
@@ -318,7 +324,7 @@ class User {
 			$allUsers[] = $user;
 		}
 		
-		$nearbyUsers = array();
+		$nearbyUsers = array(); // this holds the users that are in the required area (nearby)
 		for ($i = 0; $i < count($allUsers); $i++) {
 			$user = $allUsers[$i];
 			$distanceToUser = User::getDistanceToUser($user, $lat, $lng);
@@ -327,9 +333,10 @@ class User {
 				$nearbyUsers[] = $user;
 			}
 		}
-
-		$users = array_merge($eventsUsers, $nearbyUsers);
 		
+		// combine the "events" and the "nearby" users
+		$users = array_merge($eventsUsers, $nearbyUsers);
+
 		return $users;
 	}
 	
@@ -339,6 +346,7 @@ class User {
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
 		$link = Database::getDBConnection();
 		
+		// setup the query for retrieving all the cards that are public, have valid GPS coordinates and don't belong to the user that made the request
 		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name, 
 						u.last_lat, u.last_lng 
 			      FROM business_cards bc
@@ -346,7 +354,7 @@ class User {
 				  WHERE u.gcm_reg_id IS NOT NULL AND bc.public = 1 AND bc.user_id <> " . $userId . " AND u.last_lat IS NOT NULL AND u.last_lng IS NOT NULL;";
 		$result = mysqli_query($link, $query);
 		
-		$matchingCards = array();
+		$matchingCards = array(); // this holds all the cards that are public, have valid GPS coordinates and don't belong to the user that made the request
 		while($row = mysqli_fetch_array($result)) {
 			$card = new BusinessCard();
 			$card->setId($row["id"]);
@@ -365,17 +373,19 @@ class User {
 			$matchingCards[] = $card;
 		}
 		
+		// setup the query for getting the card ids that the user already saved
 		$query2 = "SELECT bc.id
 			      FROM users_cards uc
 				  LEFT JOIN business_cards bc ON bc.id = uc.card_id 
 				  WHERE uc.user_id = " . $userId . ";";
 		$result2 = mysqli_query($link, $query2);
 		
-		$alreadyAddedCardIds = array();
+		$alreadyAddedCardIds = array(); // this holds the ids of cards that the user already saved
 		while($row = mysqli_fetch_array($result2)) {
 			$alreadyAddedCardIds[] = $row["id"];
 		}
 
+		// the "nearby" cards must not be in the Saved Cards list and must be in the required area
 		$nearbyCards = array();
 		for ($i = 0; $i < count($matchingCards); $i++) {
 			$matchingCard = $matchingCards[$i];
@@ -435,6 +445,7 @@ class User {
 		include_once (Utils::$relativePath . "db/db_connection.php");
 		$link = Database::getDBConnection();
 		
+		// first, make sure the card was not previously added to Saved Cards
 		$query = "SELECT * 
 			      FROM users_cards 
 				  WHERE user_id = " . $userId . " AND card_id = " . $cardId . ";";
@@ -444,6 +455,7 @@ class User {
 			return "User already has access to this card";
 		}
 		
+		// add the card to the Saved Cards list for this user
 		$query2 = "INSERT INTO users_cards (user_id, card_id) 
 			VALUES (" . $userId . ", " . $cardId .  ")";
 		
@@ -458,11 +470,13 @@ class User {
 		include_once (Utils::$relativePath . "objects/Event.php");
 		$link = Database::getDBConnection();
 		
+		// make sure the event exists
 		$event = Event::getByPasscode($passcode);
 		if ($event->getId() == -1) {
 			return "Event does not exist";
 		}
 		
+		// make sure the user was not already added to the event
 		$query = "SELECT * 
 			      FROM events_users 
 				  WHERE event_id = " . $event->getId() . " AND user_id = " . $userId . ";";
@@ -472,6 +486,7 @@ class User {
 			return "User already added to event";
 		}
 		
+		// add the user to the event
 		$query2 = "INSERT INTO events_users (event_id, user_id) 
 			VALUES (" . $event->getId() . ", " . $userId .  ")";
 		
@@ -516,6 +531,7 @@ class User {
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
 		$link = Database::getDBConnection();
 		
+		// setup the query for retrieving all the cards for all the users from an event, except for the user that made the request
 		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name 
 			      FROM business_cards bc 
 				  LEFT JOIN users u ON bc.user_id = u.id 
@@ -524,7 +540,7 @@ class User {
 
 		$result = mysqli_query($link, $query);
 		
-		$matchingCards = array();
+		$matchingCards = array(); //  this holds the cards for all the users from an event, except for the user that made the request
 		while($row = mysqli_fetch_array($result)) {
 			$card = new BusinessCard();
 			$card->setId($row["id"]);
@@ -541,18 +557,20 @@ class User {
 			$matchingCards[] = $card;
 		}
 		
+		// setup the query for retrieving the Saved Cards for the user that made the request
 		$query2 = "SELECT bc.id
 			      FROM users_cards uc
 				  LEFT JOIN business_cards bc ON bc.id = uc.card_id 
 				  WHERE uc.user_id = " . $userId . ";";
 		$result2 = mysqli_query($link, $query2);
 		
-		$alreadyAddedCardIds = array();
+		$alreadyAddedCardIds = array(); // this holds the cards that the user already saved
 		while($row = mysqli_fetch_array($result2)) {
 			$alreadyAddedCardIds[] = $row["id"];
 		}
 		
-		$eventCards = array();
+		// filter out the cards that were already saved
+		$eventCards = array(); // this holds the cards from an event
 		for ($i = 0; $i < count($matchingCards); $i++) {
 			$matchingCard = $matchingCards[$i];
 			if (!in_array($matchingCard->getId(), $alreadyAddedCardIds)) {
