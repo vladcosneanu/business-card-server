@@ -535,8 +535,8 @@ class User {
 		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name 
 			      FROM business_cards bc 
 				  LEFT JOIN users u ON bc.user_id = u.id 
-				  LEFT JOIN events_users cu ON cu.user_id = u.id 
-				  WHERE cu.event_id = " . $eventId . " AND cu.user_id <> " . $userId . ";";
+				  LEFT JOIN events_users eu ON eu.user_id = u.id 
+				  WHERE eu.event_id = " . $eventId . " AND eu.user_id <> " . $userId . " AND u.gcm_reg_id IS NOT NULL;";
 
 		$result = mysqli_query($link, $query);
 		
