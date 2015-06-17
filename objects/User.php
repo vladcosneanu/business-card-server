@@ -173,8 +173,8 @@ class User {
 		$link = Database::getDBConnection();
 		
 		$query = "SELECT bc.user_id, uc.card_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name, u.username
-				  FROM users_cards uc
-			      LEFT JOIN business_cards bc ON uc.card_id = bc.id 
+				  FROM business_cards bc
+			      LEFT JOIN users_cards uc ON uc.card_id = bc.id 
 				  LEFT JOIN users u ON bc.user_id = u.id 
 				  WHERE uc.user_id = " . $userId . ";";
 		
@@ -531,16 +531,16 @@ class User {
 		include_once (Utils::$relativePath . "objects/BusinessCard.php");
 		$link = Database::getDBConnection();
 		
-		// setup the query for retrieving all the cards for all the users from an event, except for the user that made the request
+		// setup the query for retrieving all the private cards for all the users from an event, except for the user that made the request
 		$query = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name 
 			      FROM business_cards bc 
 				  LEFT JOIN users u ON bc.user_id = u.id 
 				  LEFT JOIN events_users eu ON eu.user_id = u.id 
-				  WHERE eu.event_id = " . $eventId . " AND eu.user_id <> " . $userId . " AND u.gcm_reg_id IS NOT NULL;";
-
+				  WHERE bc.public = 0 AND eu.event_id = " . $eventId . " AND eu.user_id <> " . $userId . " AND u.gcm_reg_id IS NOT NULL;";
+		
 		$result = mysqli_query($link, $query);
 		
-		$matchingCards = array(); //  this holds the cards for all the users from an event, except for the user that made the request
+		$matchingPrivateCards = array(); //  this holds the private cards for all the users from an event, except for the user that made the request
 		while($row = mysqli_fetch_array($result)) {
 			$card = new BusinessCard();
 			$card->setId($row["id"]);
@@ -554,8 +554,39 @@ class User {
 			$card->setLastName($row["last_name"]);
 			$card->setLayout($row["layout"]);
 			
-			$matchingCards[] = $card;
+			$matchingPrivateCards[] = $card;
 		}
+		///////////////////////////////
+		
+		// setup the query for retrieving all the public cards for all the users from an event, except for the user that made the request
+		$query3 = "SELECT bc.id, bc.user_id, bc.title, bc.email, bc.phone, bc.address, bc.public, bc.layout, u.first_name, u.last_name 
+			      FROM business_cards bc 
+				  LEFT JOIN users u ON bc.user_id = u.id 
+				  LEFT JOIN events_users eu ON eu.user_id = u.id 
+				  WHERE bc.public = 1 AND eu.event_id = " . $eventId . " AND eu.user_id <> " . $userId . ";";
+
+		$result3 = mysqli_query($link, $query3);
+		
+		$matchingPublicCards = array(); //  this holds the public cards for all the users from an event, except for the user that made the request
+		while($row = mysqli_fetch_array($result3)) {
+			$card = new BusinessCard();
+			$card->setId($row["id"]);
+			$card->setUserId($row["user_id"]);
+			$card->setTitle($row["title"]);
+			$card->setEmail($row["email"]);
+			$card->setPhone($row["phone"]);
+			$card->setAddress($row["address"]);
+			$card->setPublic($row["public"]);
+			$card->setFirstName($row["first_name"]);
+			$card->setLastName($row["last_name"]);
+			$card->setLayout($row["layout"]);
+			
+			$matchingPublicCards[] = $card;
+		}
+		
+		$matchingCards = array_merge($matchingPrivateCards, $matchingPublicCards);
+		
+		///////////////////////////////
 		
 		// setup the query for retrieving the Saved Cards for the user that made the request
 		$query2 = "SELECT bc.id
