@@ -5,7 +5,7 @@ class Database {
 	// get the database connection
 	public static function getDBConnection() {
 		if (Database::$link == null) {
-			Database::$link = mysqli_connect("mysql8.000webhost.com", "a4540945_user", "Loredana1", "a4540945_db");
+			Database::$link = mysqli_connect("mysql3.000webhost.com", "a6302809_user", "123456A", "a6302809_db");
 			if (!Database::$link) { 
 				die('Could not connect to MySQL: ' . mysql_error()); 
 			}
