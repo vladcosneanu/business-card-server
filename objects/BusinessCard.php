@@ -174,6 +174,13 @@ class BusinessCard {
 		if (!mysqli_query($link, $query)) {
   			die('Error: ' . mysqli_error($link));
 		}
+		
+		$query2 = "DELETE FROM users_cards 
+				  WHERE card_id = " . $this->getId() . ";";
+		
+		if (!mysqli_query($link, $query2)) {
+  			die('Error: ' . mysqli_error($link));
+		}
 	}
 	
 	// delete a card from a user's Saved Cards list
